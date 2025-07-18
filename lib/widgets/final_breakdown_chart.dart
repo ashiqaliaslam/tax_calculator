@@ -95,25 +95,45 @@ class _FinalBreakdownChartState extends State<FinalBreakdownChart> {
         // Legend
         _IndicatorRow(
           color: taxColor,
-          label: 'Tax Paid',
-          value: CurrencyFormatter.format(widget.taxDeduction),
+          label: 'Tax Deductible',
+          infoMessage:
+              """Tax Deductible under section 149 (specified in the Income Tax Ordinance,
+
+On account of Salary,""",
+          value: CurrencyFormatter.formatNoDecimal(widget.taxDeduction),
+          monthlyValue: CurrencyFormatter.formatNoDecimal(
+            widget.taxDeduction / 12,
+          ),
         ),
         _IndicatorRow(
           color: takeHomeColor,
-          label: 'Take-home Pay (Net)',
-          value: CurrencyFormatter.format(widget.takeHomePay),
+          label: 'Take-home Pay',
+          infoMessage:
+              'This Take-home pay is calculated on default tax slabs (means this calculation is without Tax Credit due to VPS investment)',
+          value: CurrencyFormatter.formatNoDecimal(widget.takeHomePay),
+          monthlyValue: CurrencyFormatter.formatNoDecimal(
+            widget.takeHomePay / 12,
+          ),
         ),
         if (widget.taxRebate > 0)
           _IndicatorRow(
             color: rebateColor,
             label: 'Tax Rebate',
-            value: CurrencyFormatter.format(widget.taxRebate),
+            infoMessage:
+                'As per Section 63 of the Income Tax Ordinance, 2001, you can claim a tax credit on investments made in a Voluntary Pension Scheme (VPS). This credit directly reduces your final tax liability, promoting savings for retirement.',
+            value: CurrencyFormatter.formatNoDecimal(widget.taxRebate),
+            monthlyValue: CurrencyFormatter.formatNoDecimal(
+              widget.taxRebate / 12,
+            ),
           ),
         const Divider(height: 24),
         _IndicatorRow(
           color: Colors.transparent, // No color dot for the total
           label: 'Total In-Hand',
-          value: CurrencyFormatter.format(totalInHand),
+          infoMessage:
+              'In-Hand = Take-home Pay + Tax Credit (Tax Credit due to Investment in VPS)',
+          value: CurrencyFormatter.formatNoDecimal(totalInHand),
+          monthlyValue: CurrencyFormatter.formatNoDecimal(totalInHand / 12),
           isBold: true,
         ),
       ],
@@ -196,13 +216,17 @@ class _IndicatorRow extends StatelessWidget {
   final Color color;
   final String label;
   final String value;
+  final String monthlyValue;
   final bool isBold;
+  final String infoMessage;
 
   const _IndicatorRow({
     required this.color,
     required this.label,
     required this.value,
+    required this.monthlyValue,
     this.isBold = false,
+    required this.infoMessage,
   });
 
   @override
@@ -210,19 +234,64 @@ class _IndicatorRow extends StatelessWidget {
     final style = Theme.of(context).textTheme.bodyLarge?.copyWith(
       fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
     );
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Container(
-            width: 16,
-            height: 16,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-          ),
-          const SizedBox(width: 8),
-          Expanded(child: Text(label, style: style)),
-          Text(value, style: style?.copyWith(fontWeight: FontWeight.bold)),
-        ],
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+        child: Row(
+          children: [
+            Container(
+              width: 16,
+              height: 16,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+            ),
+            const SizedBox(width: 8),
+            Expanded(child: Text(label, style: style)),
+            IconButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text(label),
+                      content: Text(infoMessage),
+                      actions: [
+                        ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text('Close'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              icon: Icon(Icons.info_outline),
+            ),
+            Column(
+              children: [
+                Row(
+                  children: [
+                    Text('Yearly:'),
+                    SizedBox(width: 2),
+                    Text(
+                      value,
+                      style: style?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text('Monthly:'),
+                    SizedBox(width: 2),
+                    Text(
+                      monthlyValue,
+                      style: style?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

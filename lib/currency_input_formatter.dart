@@ -59,8 +59,8 @@ class RealtimeCurrencyInputFormatter extends TextInputFormatter {
     );
 
     if (fractionalPart != null) {
-      final truncatedFractional = fractionalPart.length > 2
-          ? fractionalPart.substring(0, 2)
+      final truncatedFractional = fractionalPart.length > 1
+          ? fractionalPart.substring(0, 1)
           : fractionalPart;
       return '$formattedIntegerPart.$truncatedFractional';
     } else {

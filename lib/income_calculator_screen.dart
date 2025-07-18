@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tax_calculator/widgets/final_breakdown_chart.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'income_provider.dart';
 import 'currency_formatter.dart';
 import 'widgets/income_input_field.dart';
@@ -82,12 +83,67 @@ class _IncomeCalculatorScreenState extends State<IncomeCalculatorScreen> {
     return year;
   }
 
+  void _launchURL(String url) async {
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri)) {
+      // Show a snackbar if the URL can't be launched
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not launch $url')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tax Calculator'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () {
+              showAboutDialog(
+                context: context,
+                applicationName: 'Tax Calculator',
+                applicationVersion: '1.0.0',
+                applicationLegalese: '©2025 Ashique Ali',
+                children: <Widget>[
+                  const Padding(
+                    padding: EdgeInsets.only(top: 15, bottom: 10),
+                    child: Text('A simple and elegant income tax calculator.'),
+                  ),
+                  // Clickable LinkedIn Link
+                  InkWell(
+                    onTap: () =>
+                        _launchURL('https://linkedin.com/in/ashiqaliaslam'),
+                    child: Text(
+                      'LinkedIn Profile',
+                      style: TextStyle(
+                        decoration: TextDecoration.underline,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Clickable Bio Link
+                  InkWell(
+                    onTap: () => _launchURL('https://bio.link/ashiqaliaslam'),
+                    child: Text(
+                      'More Bio Links',
+                      style: TextStyle(
+                        decoration: TextDecoration.underline,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
       ),
       body: Consumer<IncomeProvider>(
         builder: (context, provider, child) {

@@ -7,7 +7,7 @@ class CurrencyFormatter {
     locale: 'en_PK',
     // symbol: 'PKR ',
     symbol: '',
-    decimalDigits: 2,
+    decimalDigits: 1,
   );
 
   // Formatter for whole numbers (integers).
@@ -32,6 +32,10 @@ class CurrencyFormatter {
       // Is a whole number, so use the integer formatter.
       return _integerCurrencyFormat.format(value);
     }
+  }
+
+  static String formatNoDecimal(double value) {
+    return _integerCurrencyFormat.format(value);
   }
 
   /// Parses a string (which may contain currency symbols and commas) into a double.
